@@ -186,13 +186,19 @@ Returns the parameters to be passed into the procedure.
 
 =head3 data
 
-An array or hashref. Sets the parameters.
+An array or hashref. Sets the parameters. Will set an error if the params are not an array ref or hash ref.
 
 =cut
 
 has params  => (
     is      => 'rw',
     default => undef,
+    trigger => sub {
+            my ($self, $new, $old) = @_;
+            unless (ref $new eq 'ARRAY' or ref $new eq 'HASH') {
+                $self->invalid_params('Params must be an array ref or hash ref.');
+            }
+        },
 );
 
 #--------------------------------------------------------

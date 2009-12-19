@@ -80,6 +80,7 @@ B<NOTE:> If you don't care about setting error codes and just want to set an err
 
 
 use Moose;
+use bytes;
 extends qw(Plack::Component);
 use Plack::Request;
 use JSON;
@@ -221,6 +222,7 @@ sub handle_procedures {
     my @responses;
     my $rpcs = $self->rpcs;
     foreach my $proc (@{$procs}) {
+        my $is_notification = ($proc->id eq '') ? 1 : 0;
         unless ($proc->has_error_code) {
             my $rpc = $rpcs->{$proc->method};
             if (defined $rpc) {
@@ -237,10 +239,23 @@ sub handle_procedures {
                 $proc->method_not_found($proc->method);
             }
         }
-        push @responses, $proc->response;
+
+        # remove not needed elements per section 5 of the spec
+        my $response = $proc->response;
+        if (exists $response->{error}{code}) {
+            delete $response->{result};
+        }
+        else {
+            delete $response->{error};
+        }
+
+        # remove responses on notifications per section 4.1 of the spec
+        unless ($is_notification) {
+            push @responses, $response;
+        }
     }
 
-    # return the appropriate response
+    # return the appropriate response, for batch or not
     if (scalar(@responses) > 1) {
         return \@responses;
     }
@@ -272,9 +287,16 @@ sub call {
     }
 
     my $response = $request->new_response;
-    $response->status($self->translate_error_code_to_status( (ref $rpc_response eq 'HASH') ? $rpc_response->{error}{code} : '' ));
-    $response->content_type('application/json-rpc');
-    $response->body(to_json($rpc_response));
+    if ($rpc_response) {
+        $response->status($self->translate_error_code_to_status( (ref $rpc_response eq 'HASH') ? $rpc_response->{error}{code} : '' ));
+        $response->content_type('application/json-rpc');
+        my $json = to_json($rpc_response);
+        $response->content_length(bytes::length($json));
+        $response->body($json);
+    }
+    else { # is a notification only request
+        $response->status(204);
+    }
     return $response->finalize;
 }
 
@@ -296,14 +318,6 @@ This module still needs some work.
 =item *
 
 It has no test suite, and that needs to be fixed up asap. Although, all of the examples in the eg folder have been tested and work.
-
-=item *
-
-It doesn't support "notifications".
-
-=item *
-
-It's not strict about the protocol version number, or request id right now. Not sure if that's good or bad.
 
 =item *
 

@@ -1,2 +1,8 @@
+0.0101 2009-12-19
+ - Params now set error if they aren't a hash or array as specified in the spec.
+ - We now send the Content-Length header with the response per the spec.
+ - Notification responses are removed from batch requests, and if only a notification is sent the HTTP response is 204 No Content per the spec.
+ - Removed extraneous result/error nodes per spec.
+
 0.0100 2009-12-19
  - Initial public release.
