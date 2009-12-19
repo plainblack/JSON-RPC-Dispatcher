@@ -206,6 +206,7 @@ sub acquire_procedure_from_get {
 #--------------------------------------------------------
 sub translate_error_code_to_status {
     my ($self, $code) = @_;
+    $code ||= '';
     my %trans = (
         ''          => 200,
         '-32600'    => 400,
@@ -288,7 +289,7 @@ sub call {
 
     my $response = $request->new_response;
     if ($rpc_response) {
-        $response->status($self->translate_error_code_to_status( (ref $rpc_response eq 'HASH') ? $rpc_response->{error}{code} : '' ));
+        $response->status($self->translate_error_code_to_status( (ref $rpc_response eq 'HASH' && exists $rpc_response->{error}) ? $rpc_response->{error}{code} : '' ));
         $response->content_type('application/json-rpc');
         my $json = to_json($rpc_response);
         $response->content_length(bytes::length($json));
