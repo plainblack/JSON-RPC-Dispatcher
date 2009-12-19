@@ -3,6 +3,8 @@
  - We now send the Content-Length header with the response per the spec.
  - Notification responses are removed from batch requests, and if only a notification is sent the HTTP response is 204 No Content per the spec.
  - Removed extraneous result/error nodes per spec.
+ - Fixed bulk requests.
+ - Added author tests which put the whole system through it's paces.
 
 0.0100 2009-12-19
  - Initial public release.

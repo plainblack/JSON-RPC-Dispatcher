@@ -159,7 +159,7 @@ sub acquire_procedures_from_post {
         if (ref $request eq 'ARRAY') {
             my @procs;
             foreach my $proc (@{$request}) {
-                push @procs, $self->acquire_procedure_from_hashref($request);
+                push @procs, $self->acquire_procedure_from_hashref($proc);
             }
             return \@procs;
         }
@@ -308,23 +308,10 @@ L<JSON>
 L<Plack>
 L<Plack::Request>
 L<Test::More>
-L<Test::Deep>
 
 =head1 TODO
 
-This module still needs some work.
-
-=over
-
-=item *
-
-It has no test suite, and that needs to be fixed up asap. Although, all of the examples in the eg folder have been tested and work.
-
-=item *
-
 Once the JSON-RPC 2.0 spec is finalized, this module may need to change to support any last minute changes or additions.
-
-=back
 
 =head1 SUPPORT
 
