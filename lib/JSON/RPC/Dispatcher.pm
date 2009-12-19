@@ -379,6 +379,8 @@ A simple and good looking JSON::RPC 1.x client. I haven't tried it though.
 
 =back
 
+=back
+
 =head1 AUTHOR
 
 JT Smith <jt_at_plainblack_com>
