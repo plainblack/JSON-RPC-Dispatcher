@@ -181,7 +181,7 @@ sub acquire_procedure_from_hashref {
     my $proc = JSON::RPC::Dispatcher::Procedure->new;
     $proc->method($hashref->{method});
     $proc->id($hashref->{id});
-    $proc->params($hashref->{params});
+    $proc->params($hashref->{params}) if exists $hashref->{params};
     return $proc;
 }
 
@@ -198,7 +198,7 @@ sub acquire_procedure_from_get {
         $proc->error_data($params->{params});
     }
     else {
-        $proc->params($decoded_params);
+        $proc->params($decoded_params) if defined $decoded_params;
     }
     return $proc;
 }
