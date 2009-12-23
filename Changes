@@ -1,3 +1,7 @@
+0.0200 2009-12-23
+ - Added JSON::RPC::Dispatcher::App to make it easy to create sub-classable apps.
+ - Added required Sub::Name.
+
 0.0101 2009-12-19
  - Params now set error if they aren't a hash or array as specified in the spec.
  - We now send the Content-Length header with the response per the spec.

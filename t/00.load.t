@@ -3,4 +3,3 @@ use lib '../lib';
 
 use_ok( 'JSON::RPC::Dispatcher' );
 
-
