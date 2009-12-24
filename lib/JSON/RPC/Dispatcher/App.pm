@@ -51,6 +51,8 @@ JSON::RPC::Dispatcher::App - A base class for creating object oriented apps with
 
 =head1 DESCRIPTION
 
+This package gives you a base class to make it easy to create object-oriented JSON-RPC applications. This is a huge benefit when writing a larger app or suite of applications rather than just exposing a procedure or two. If you build out classes of methods using JSON::RPC::Dispatcher::App, and then use L<Plack::App::URLMap> to mount each module on a different URL, you can make a pretty powerful application server in very little time.
+
 =head1 METHODS
 
 The following methods are available from this class.

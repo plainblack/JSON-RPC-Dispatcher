@@ -1,4 +1,4 @@
-0.0200 2009-12-23
+0.0200 2009-12-24
  - Added JSON::RPC::Dispatcher::App to make it easy to create sub-classable apps.
  - Added required module Sub::Name.
  - Added error() helper method to JSON::RPC::Dispatcher::Procedure.
