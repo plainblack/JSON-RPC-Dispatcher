@@ -151,11 +151,16 @@ Generates a PSGI/L<Plack> compatible app.
 sub to_app {
     my $self = shift;
     my $rpc = JSON::RPC::Dispatcher->new;
-    foreach my $method ($self->_rpc_method_names) {
-        $rpc->register($method, sub {  $self->$method(@_) });
+    my $ref;
+    if ($ref = $self->can('_rpc_method_names')) {
+        foreach my $method ($ref->()) {
+            $rpc->register($method, sub {  $self->$method(@_) });
+        }
     }
-    foreach my $method ($self->_rpc_method_names) {
-        $rpc->register_advanced($method, sub {  $self->$method(@_) });
+    if ($ref = $self->can('_advanced_rpc_method_names')) {
+        foreach my $method ($ref->()) {
+            $rpc->register_advanced($method, sub {  $self->$method(@_) });
+        }
     }
     $rpc->to_app;
 }

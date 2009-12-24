@@ -81,6 +81,19 @@ has error_data  => (
 
 #--------------------------------------------------------
 
+=head2 error ( code, message, [ data ] )
+
+=cut
+
+sub error {
+    my ($self, $code, $message, $data) = @_;
+    $self->error_code($code);
+    $self->error_message($message);
+    $self->error_data($data);
+}
+
+#--------------------------------------------------------
+
 =head2 invalid_request ( [ data ] ) 
 
 Sets an Invalid Request error as defined by the JSON-RPC 2.0 spec.

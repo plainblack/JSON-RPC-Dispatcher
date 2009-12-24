@@ -1,6 +1,7 @@
 0.0200 2009-12-23
  - Added JSON::RPC::Dispatcher::App to make it easy to create sub-classable apps.
- - Added required Sub::Name.
+ - Added required module Sub::Name.
+ - Added error() helper method to JSON::RPC::Dispatcher::Procedure.
 
 0.0101 2009-12-19
  - Params now set error if they aren't a hash or array as specified in the spec.
