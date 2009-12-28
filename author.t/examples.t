@@ -1,12 +1,10 @@
-#!/usr/bin/env perl
-
 use LWP::UserAgent;
 use Test::More tests=>8;
 
 my $ua = LWP::UserAgent->new;
 
 unless ($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"ping","id":"1"}')->is_success) {
-    die "You need to plackup eg/app.psgi before running these tests!";
+    die "You need to 'plackup -E prod eg/app.psgi' before running these tests!";
 }
 
 is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"ping","id":"1"}')->content,

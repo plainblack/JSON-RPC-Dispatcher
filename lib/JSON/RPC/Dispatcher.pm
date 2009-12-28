@@ -12,9 +12,9 @@ JSON::RPC::Dispatcher - A JSON-RPC 2.0 server.
  my $rpc = JSON::RPC::Dispatcher->new;
 
  sub add_em {
-    my $params = shift;
+    my @params = @_;
     my $sum = 0;
-    $sum += $_ for @{$params};
+    $sum += $_ for @params;
     return $sum;
  }
  $rpc->register( 'sum', \&add_em );
@@ -43,36 +43,29 @@ Using this app you can make any PSGI/L<Plack> aware server a JSON-RPC 2.0 server
 
 This module follows the draft specficiation for JSON-RPC 2.0. More information can be found at L<http://groups.google.com/group/json-rpc/web/json-rpc-1-2-proposal>.
 
-=head2 Advanced RPC
+=head2 Advanced Error Handling
 
-You can also get access to the procedure's internal data structures to do more advanced things. You do this by using the C<register_advanced> method as in this example.
+You can also throw error messages rather than just C<die>ing, which will throw an internal server error. To throw a specific type of error, C<die>, C<carp>, or C<confess>, an array reference starting with the error code, then the error message, and finally ending with error data (optional). When JSON::RPC::Dispatcher detects this, it will throw that specific error message rather than a standard internal server error.
 
  use JSON::RPC::Dispatcher;
  my $rpc = JSON::RPC::Dispatcher->new;
 
  sub guess {
-    my $proc = shift;
-    my $guess = $proc->params->[0];
+     my ($guess) = @_;
     if ($guess == 10) {
 	    return 'Correct!';
     }
     elsif ($guess > 10) {
-	    $proc->error_code(986);
-    	$proc->error_message('Too high.');
+        die [986, 'Too high.'];
     }
     else {
-	    $proc->error_code(987);
-    	$proc->error_message('Too low.');
+        die [987, 'Too low.'];
     }
-    $proc->error_data($guess);
-    return undef;
  }
 
- $rpc->register_advanced( 'guess', \&guess );
+ $rpc->register( 'guess', \&guess );
 
  $rpc->to_app;
-
-In the above example the guess subroutine gets direct access to the L<JSON::RPC::Dispatcher::Procedure> object. This happens by calling C<register_advanced> rather than C<register>. By doing this you can set custom error codes, which can be used by your client application to implement more advanced functionality. You could also use this to throw exceptions for parameter validation and many other uses.
 
 B<NOTE:> If you don't care about setting error codes and just want to set an error message, you can simply C<die> in your RPC and your die message will be inserted into the C<error_data> method.
 
@@ -112,19 +105,10 @@ has rpcs => (
 );
 
 #--------------------------------------------------------
-sub register_advanced {
-    my ($self, $name, $sub) = @_;
-    my $rpcs = $self->rpcs;
-    $rpcs->{$name}{sub} = $sub;
-    $self->rpcs($rpcs);
-}
-
-#--------------------------------------------------------
 sub register {
     my ($self, $name, $sub) = @_;
     my $rpcs = $self->rpcs;
-    $rpcs->{$name}{sub} = $sub;
-    $rpcs->{$name}{simple} = 1;
+    $rpcs->{$name} = $sub;
     $self->rpcs($rpcs);
 }
 
@@ -227,9 +211,25 @@ sub handle_procedures {
         unless ($proc->has_error_code) {
             my $rpc = $rpcs->{$proc->method};
             if (defined $rpc) {
-                my $params = ($rpc->{simple}) ? $proc->params : $proc;
-                my $result = eval{$rpc->{sub}->($params)};
-                if ($@) {
+                my $result;
+
+                # deal with params and calling
+                my $params = $proc->params;
+                if (ref $params eq 'HASH') {
+                    $result = eval{$rpc->(%{$params})};
+                }
+                elsif (ref $params eq 'ARRAY') {
+                    $result = eval{$rpc->(@{$params})};
+                }
+                else {
+                    $result = eval{$rpc->()};
+                }
+
+                # deal with result
+                if ($@ && ref($@) eq 'ARRAY') {
+                    $proc->error(@{$@});
+                }
+                elsif ($@) {
                     $proc->internal_error($@);
                 }
                 else {

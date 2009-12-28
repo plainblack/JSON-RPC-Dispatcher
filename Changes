@@ -1,3 +1,8 @@
+0.0300 2009-12-28
+ - Got rid of the notion of "advanced" methods in favor of a cleaner way to throw errors.
+ - Now throws errors by dieing with an array ref of [code, msg, data].
+ - Procedures are now passed their data as a list not refs.
+
 0.0200 2009-12-24
  - Added JSON::RPC::Dispatcher::App to make it easy to create sub-classable apps.
  - Added required module Sub::Name.
