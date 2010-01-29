@@ -116,7 +116,7 @@ sub register {
 sub acquire_procedures {
     my ($self, $request) = @_;
     if ($request->method eq 'POST') {
-        return $self->acquire_procedures_from_post($request->raw_body);
+        return $self->acquire_procedures_from_post($request->content);
     }
     elsif ($request->method eq 'GET') {
         return [ $self->acquire_procedure_from_get($request->query_parameters) ];
