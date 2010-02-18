@@ -1,3 +1,6 @@
+0.0300 2010-02-15
+ - Added exception handling for when procs don't throw exceptions, but also don't return valid content.
+
 0.0300 2009-12-28
  - Got rid of the notion of "advanced" methods in favor of a cleaner way to throw errors.
  - Now throws errors by dieing with an array ref of [code, msg, data].
