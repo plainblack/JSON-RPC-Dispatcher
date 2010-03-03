@@ -1,6 +1,7 @@
 0.0400 2010-03-03
  - Output stack trace on unhandled exceptions.
  - Added exception handling for when procs don't throw exceptions, but also don't return valid content.
+ - Eliminated Sub::Name dependency.
 
 0.0300 2009-12-28
  - Got rid of the notion of "advanced" methods in favor of a cleaner way to throw errors.

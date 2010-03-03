@@ -2,7 +2,6 @@ package JSON::RPC::Dispatcher::App;
 
 use Moose;
 use JSON::RPC::Dispatcher;
-use Sub::Name;
 
 =head1 NAME
 
@@ -95,18 +94,16 @@ The list of method names to register.
 
 =cut
 
+sub _rpc_method_names {
+    return ();
+}
+
 sub register_rpc_method_names {
     my ($class, @methods) = @_;
-    my $name = $class."::_rpc_method_names";
-    no strict 'refs';
-    *{$name} = Sub::Name::subname($name, sub { 
-        my @old_names = ();
-        my $super = $class.'::SUPER';
-        if ($super->can('_rpc_method_names')) {
-            @old_names = $super->_rpc_method_names;
-        }
-        return (@old_names, @methods); 
-    } );
+    $class->meta->add_around_method_modifier('_rpc_method_names', sub {
+        my ($orig, $self) = @_;
+        return ($orig->(), @methods);
+    });
 }
 
 

@@ -329,7 +329,6 @@ L<JSON>
 L<Plack>
 L<Plack::Request>
 L<Test::More>
-L<Sub::Name>
 
 =head1 TODO
 
