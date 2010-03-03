@@ -130,7 +130,7 @@ sub to_app {
 
 =head1 LEGAL
 
-JSON::RPC::Dispatcher is Copyright 2009 Plain Black Corporation (L<http://www.plainblack.com/>) and is licensed under the same terms as Perl itself.
+JSON::RPC::Dispatcher is Copyright 2009-2010 Plain Black Corporation (L<http://www.plainblack.com/>) and is licensed under the same terms as Perl itself.
 
 =cut
 
