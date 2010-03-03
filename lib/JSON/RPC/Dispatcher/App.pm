@@ -9,7 +9,8 @@ JSON::RPC::Dispatcher::App - A base class for creating object oriented apps with
 
 =head1 SYNOPSIS
 
- # create your app
+Create your module:
+
  package MyApp;
 
  use Moose;
@@ -39,7 +40,8 @@ JSON::RPC::Dispatcher::App - A base class for creating object oriented apps with
 
  1;
 
- # app.psgi
+Then your plack F<app.psgi>:
+
  MyApp->new->to_app;
 
 =head1 DESCRIPTION
@@ -76,7 +78,8 @@ When you subclass you can easily add your own attributes using L<Moose>'s C<has>
 
  1;
 
- # app.psgi
+In F<app.psgi>:
+
  my $db = DBI->connect(...);
  MyApp->new(db=>$db)->to_app;
 
@@ -134,6 +137,4 @@ JSON::RPC::Dispatcher is Copyright 2009-2010 Plain Black Corporation (L<http://w
 
 =cut
 
-no Moose;
-__PACKAGE__->meta->make_immutable;
-
+1;

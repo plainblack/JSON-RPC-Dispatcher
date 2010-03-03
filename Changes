@@ -1,7 +1,9 @@
 0.0400 2010-03-03
- - Output stack trace on unhandled exceptions.
  - Added exception handling for when procs don't throw exceptions, but also don't return valid content.
  - Eliminated Sub::Name dependency.
+ - Now requires Plack 0.9913.
+ - Merged miyagawa's patch for updated Plack.
+ - Added logging support via Log::Any; now requires Log::Any.
 
 0.0300 2009-12-28
  - Got rid of the notion of "advanced" methods in favor of a cleaner way to throw errors.
