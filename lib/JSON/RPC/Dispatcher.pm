@@ -230,7 +230,17 @@ sub handle_procedures {
                     $proc->error(@{$@});
                 }
                 elsif ($@) {
-                    $proc->internal_error($@);
+                    my $error = $@;
+                    if ($error->can('error') && $error->can('trace')) {
+                         $error = $error->error . "\n". $error->trace->as_string;
+                    }
+                    elsif ($error->can('error')) {
+                        $error = $error->error;
+                    }
+                    elsif (ref $error ne '' && ref $error ne 'HASH' && ref $error ne 'ARRAY') {
+                        $error = ref $error;
+                    }
+                    $proc->internal_error($error);
                 }
                 else {
                     $proc->result($result);
@@ -291,7 +301,7 @@ sub call {
     if ($rpc_response) {
         my $json = eval{to_json($rpc_response)};
         if ($@) {
-            warn "WTF: ".$@;
+            warn "JSON repsonse error: ".$@;
             $json = to_json({
                 jsonrpc => "2.0",
                 error   => {

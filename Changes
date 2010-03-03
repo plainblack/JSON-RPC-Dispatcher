@@ -1,4 +1,5 @@
-0.0300 2010-02-15
+0.0400 2010-03-03
+ - Output stack trace on unhandled exceptions.
  - Added exception handling for when procs don't throw exceptions, but also don't return valid content.
 
 0.0300 2009-12-28
