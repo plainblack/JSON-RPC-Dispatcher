@@ -1,3 +1,6 @@
+0.0401 2010-03-04
+ - Fixed a crash bug with some types of fatal errors.
+
 0.0400 2010-03-03
  - Added exception handling for when procs don't throw exceptions, but also don't return valid content.
  - Eliminated Sub::Name dependency.
