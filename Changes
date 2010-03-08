@@ -1,5 +1,6 @@
 0.0402 2010-03-08
  - Fixed an uninitialized warning.
+ - JSON RPC 2.0 has been ratified
 
 0.0401 2010-03-04
  - Fixed a crash bug with some types of fatal errors.
