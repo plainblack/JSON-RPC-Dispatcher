@@ -185,7 +185,7 @@ has method  => (
     default => undef,
     trigger => sub {
             my ($self, $new, $old) = @_;
-            unless ($new =~ m{^[A-Za-z0-9_]+$}xms) {
+            if (defined $new && $new !~ m{^[A-Za-z0-9_]+$}xms) {
                 $self->invalid_request($new.' is not a valid method name.');
             }
         },
