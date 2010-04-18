@@ -1,3 +1,5 @@
+0.0403 2010-04-19
+
 0.0402 2010-04-18
  - Fixed an uninitialized warning.
  - Some types of fatal errors weren't being logged.
