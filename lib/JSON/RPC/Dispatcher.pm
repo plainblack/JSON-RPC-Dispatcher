@@ -150,6 +150,8 @@ sub acquire_procedures_from_post {
         $self->error_code(-32700);
         $self->error_message('Parse error.');
         $self->error_data($body);
+        $log->fatal('Parse error.');
+        $log->debug($body);
         return undef;
     }
     else {
@@ -167,6 +169,8 @@ sub acquire_procedures_from_post {
             $self->error_code(-32600);
             $self->error_message('Invalid request.');
             $self->error_data($request);
+            $log->fatal('Invalid request.');
+            $log->debug($body);
             return undef;
         }
     }
