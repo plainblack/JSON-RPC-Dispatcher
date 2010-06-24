@@ -206,13 +206,8 @@ An array or hashref. Sets the parameters. Will set an error if the params are no
 has params  => (
     is      => 'rw',
     default => undef,
-    trigger => sub {
-            my ($self, $new, $old) = @_;
-            unless (ref $new eq 'ARRAY' or ref $new eq 'HASH') {
-                $self->invalid_params('Params must be an array ref or hash ref.');
-            }
-        },
 );
+
 
 #--------------------------------------------------------
 

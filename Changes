@@ -2,6 +2,8 @@
  - Moved bug tracking to github.
  - Messages that process correctly, but return an error response rather than a result response now log as "error" rather than "info". All other errors are still logged as "fatal".
  - Added more documentation about what is logged.
+ - Restructured request params handling.
+ - Added with_plack_request registration option.
 
 0.0402 2010-04-18
  - Fixed an uninitialized warning.

@@ -44,6 +44,23 @@ Using this app you can make any PSGI/L<Plack> aware server a JSON-RPC 2.0 server
 
 This module follows the draft specficiation for JSON-RPC 2.0. More information can be found at L<http://groups.google.com/group/json-rpc/web/json-rpc-2-0>.
 
+=head2 Registration Options
+
+The C<register> method takes a third argument which is a hash of named options that effects how the code should be handled.
+
+=head3 with_plack_request
+
+The first argument passed into the function will be a reference to the Plack::Request object, which is great for getting environment variables, and HTTP headers if you need those things in processing your RPC.
+
+ $rpc->register( 'some_func', \&some_func, with_plack_request => 1);
+
+ sub some_func {
+     my ($plack_request, $other_arg) = @_;
+     ...
+ }
+
+B<TIP:> Before using this option consider whether you might be better served by a L<Plack::Middleware> component. For example, if you want to do HTTP Basic Auth on your requests, use L<Plack::Middleware::Basic::Auth> instead. 
+
 =head2 Advanced Error Handling
 
 You can also throw error messages rather than just C<die>ing, which will throw an internal server error. To throw a specific type of error, C<die>, C<carp>, or C<confess>, an array reference starting with the error code, then the error message, and finally ending with error data (optional). When JSON::RPC::Dispatcher detects this, it will throw that specific error message rather than a standard internal server error.
@@ -145,9 +162,12 @@ has rpcs => (
 
 #--------------------------------------------------------
 sub register {
-    my ($self, $name, $sub) = @_;
+    my ($self, $name, $sub, %options) = @_;
     my $rpcs = $self->rpcs;
-    $rpcs->{$name} = $sub;
+    $rpcs->{$name} = {
+        code                => $sub,
+        with_plack_request  => $options{with_plack_request},
+    };
     $self->rpcs($rpcs);
 }
 
@@ -155,10 +175,10 @@ sub register {
 sub acquire_procedures {
     my ($self, $request) = @_;
     if ($request->method eq 'POST') {
-        return $self->acquire_procedures_from_post($request->content);
+        return $self->acquire_procedures_from_post($request);
     }
     elsif ($request->method eq 'GET') {
-        return [ $self->acquire_procedure_from_get($request->query_parameters) ];
+        return [ $self->acquire_procedure_from_get($request) ];
     }
     else {
         $self->error_code(-32600);
@@ -170,7 +190,8 @@ sub acquire_procedures {
 
 #--------------------------------------------------------
 sub acquire_procedures_from_post {
-    my ($self, $body) = @_;
+    my ($self, $plack_request) = @_;
+    my $body = $plack_request->content;
     my $request = eval{from_json($body)};
     if ($@) {
         $self->error_code(-32700);
@@ -184,12 +205,12 @@ sub acquire_procedures_from_post {
         if (ref $request eq 'ARRAY') {
             my @procs;
             foreach my $proc (@{$request}) {
-                push @procs, $self->acquire_procedure_from_hashref($proc);
+                push @procs, $self->create_proc($proc->{method}, $proc->{id}, $proc->{params}, $plack_request);
             }
             return \@procs;
         }
         elsif (ref $request eq 'HASH') {
-            return [ $self->acquire_procedure_from_hashref($request) ];
+            return [ $self->create_proc($request->{method}, $request->{id}, $request->{params}, $plack_request) ];
         }
         else {
             $self->error_code(-32600);
@@ -203,30 +224,39 @@ sub acquire_procedures_from_post {
 }
 
 #--------------------------------------------------------
-sub acquire_procedure_from_hashref {
-    my ($self, $hashref) = @_;
-    my $proc = JSON::RPC::Dispatcher::Procedure->new;
-    $proc->method($hashref->{method});
-    $proc->id($hashref->{id});
-    $proc->params($hashref->{params}) if exists $hashref->{params};
-    return $proc;
+sub acquire_procedure_from_get {
+    my ($self, $plack_request) = @_;
+    my $params = $plack_request->query_parameters;
+    my $decoded_params = (exists $params->{params}) ? eval{from_json($params->{params})} : undef;
+    return $self->create_proc($params->{method}, $params->{id}, ($@ || $decoded_params), $plack_request);
 }
 
 #--------------------------------------------------------
-sub acquire_procedure_from_get {
-    my ($self, $params) = @_;
-    my $proc = JSON::RPC::Dispatcher::Procedure->new;
-    $proc->method($params->{method});
-    $proc->id($params->{id});
-    my $decoded_params = (exists $params->{params}) ? eval{from_json($params->{params})} : undef;
-    if ($@) {
-        $proc->error_code(-32602);
-        $proc->error_message('Invalid params');
-        $proc->error_data($params->{params});
+sub create_proc {
+    my ($self, $method, $id, $params, $plack_request) = @_;
+    my $proc = JSON::RPC::Dispatcher::Procedure->new(
+        method  => $method,
+        id      => $id,
+    );
+
+    # process parameters
+    if (defined $params) {
+        unless (ref $params eq 'ARRAY' or ref $params eq 'HASH') {
+            $proc->invalid_params($params);
+            return $proc;
+        }
     }
-    else {
-        $proc->params($decoded_params) if defined $decoded_params;
+    my @vetted;
+    if (ref $params eq 'HASH') {
+        @vetted = (%{$params});
     }
+    elsif (ref $params eq 'ARRAY') {
+        @vetted = (@{$params});
+    }
+    if ($self->rpcs->{$proc->method}{with_plack_request}) {
+        unshift @vetted, $proc->plack_request;
+    }
+    $proc->params(\@vetted);
     return $proc;
 }
 
@@ -255,18 +285,10 @@ sub handle_procedures {
             my $rpc = $rpcs->{$proc->method};
             if (defined $rpc) {
                 my $result;
+                my $code_ref = $rpc->{code};
 
                 # deal with params and calling
-                my $params = $proc->params;
-                if (ref $params eq 'HASH') {
-                    $result = eval{$rpc->(%{$params})};
-                }
-                elsif (ref $params eq 'ARRAY') {
-                    $result = eval{$rpc->(@{$params})};
-                }
-                else {
-                    $result = eval{$rpc->()};
-                }
+                $result = eval{ $code_ref->( @{ $proc->params } ) };
 
                 # deal with result
                 if ($@ && ref($@) eq 'ARRAY') {
