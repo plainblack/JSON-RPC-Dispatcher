@@ -81,6 +81,32 @@ JSON::RPC::Dispatcher allows for logging via L<Log::Any>. This way you can set u
 
 That's how easy it is to start logging. You'll of course still need to configure the F<log4perl.conf> file, which goes well beyond the scope of this document. And you'll also need to install L<Log::Any::Adapter::Log4perl> to use this example.
 
+JSON::RPC::Dispatcher logs the following:
+
+=over
+
+=item INFO
+
+Requests and responses.
+
+=item DEBUG
+
+In the case when there is an unhandled exception, anything other than the error message will be put into a debug log entry.
+
+=item TRACE
+
+If an exception is thrown that has a C<trace> method, then it's contents will be put into a trace log entry.
+
+=item ERROR
+
+All errors that are gracefully handled by the system will be put into an error log entry.
+
+=item FATAL
+
+All errors that are not gracefully handled by the system will be put into a fatal log entry. Most of the time this means there's something wrong with the request document itself.
+
+=back
+
 =cut
 
 
@@ -325,7 +351,7 @@ sub call {
     if ($rpc_response) {
         my $json = eval{to_json($rpc_response)};
         if ($@) {
-            $log->warn("JSON repsonse error: ".$@);
+            $log->error("JSON repsonse error: ".$@);
             $json = to_json({
                 jsonrpc => "2.0",
                 error   => {
@@ -339,7 +365,12 @@ sub call {
         $response->content_type('application/json-rpc');
         $response->content_length(bytes::length($json));
         $response->body($json);
-        $log->info("RESPONSE: ".$response->body) if $log->is_info;
+        if ($response->status == 200) {
+            $log->info("RESPONSE: ".$response->body) if $log->is_info;
+        }
+        else {
+            $log->error("RESPONSE: ".$response->body);
+        }
     }
     else { # is a notification only request
         $response->status(204);
@@ -366,7 +397,7 @@ L<http://github.com/plainblack/JSON-RPC-Dispatcher>
 
 =item Bug Reports
 
-L<http://rt.cpan.org/Public/Dist/Display.html?Name=JSON-RPC-Dispatcher>
+L<http://github.com/plainblack/JSON-RPC-Dispatcher/issues>
 
 =back
 

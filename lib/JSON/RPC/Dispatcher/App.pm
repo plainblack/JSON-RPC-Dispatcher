@@ -109,7 +109,6 @@ sub register_rpc_method_names {
     });
 }
 
-
 #--------------------------------------------------------
 
 =head2 to_app ( )
@@ -120,7 +119,7 @@ Generates a PSGI/L<Plack> compatible app.
 
 sub to_app {
     my $self = shift;
-    my $rpc = JSON::RPC::Dispatcher->new;
+    my $rpc = $self->json_rpc_dispatcher;
     my $ref;
     if ($ref = $self->can('_rpc_method_names')) {
         foreach my $method ($ref->()) {
