@@ -1,4 +1,4 @@
-0.0403 2010-06-23
+0.0500 2010-06-24
  - Moved bug tracking to github.
  - Messages that process correctly, but return an error response rather than a result response now log as "error" rather than "info". All other errors are still logged as "fatal".
  - Added more documentation about what is logged.
