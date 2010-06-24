@@ -46,13 +46,13 @@ This module follows the draft specficiation for JSON-RPC 2.0. More information c
 
 =head2 Registration Options
 
-The C<register> method takes a third argument which is a hash of named options that effects how the code should be handled.
+The C<register> method takes a third argument which is a hash reference of named options that effects how the code should be handled.
 
 =head3 with_plack_request
 
 The first argument passed into the function will be a reference to the Plack::Request object, which is great for getting environment variables, and HTTP headers if you need those things in processing your RPC.
 
- $rpc->register( 'some_func', \&some_func, with_plack_request => 1);
+ $rpc->register( 'some_func', \&some_func, { with_plack_request => 1 });
 
  sub some_func {
      my ($plack_request, $other_arg) = @_;
@@ -162,11 +162,11 @@ has rpcs => (
 
 #--------------------------------------------------------
 sub register {
-    my ($self, $name, $sub, %options) = @_;
+    my ($self, $name, $sub, $options) = @_;
     my $rpcs = $self->rpcs;
     $rpcs->{$name} = {
         code                => $sub,
-        with_plack_request  => $options{with_plack_request},
+        with_plack_request  => $options->{with_plack_request},
     };
     $self->rpcs($rpcs);
 }
@@ -254,7 +254,7 @@ sub create_proc {
         @vetted = (@{$params});
     }
     if ($self->rpcs->{$proc->method}{with_plack_request}) {
-        unshift @vetted, $proc->plack_request;
+        unshift @vetted, $plack_request;
     }
     $proc->params(\@vetted);
     return $proc;

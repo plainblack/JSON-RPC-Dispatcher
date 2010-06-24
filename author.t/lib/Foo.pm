@@ -12,9 +12,12 @@ sub sum {
     return $sum;
 }
 
+sub ip_address {
+    my ($self, $plack_request) = @_;
+    return $plack_request->address;
+}
 
 
-
-__PACKAGE__->register_rpc_method_names( qw( sum ) );
+__PACKAGE__->register_rpc_method_names( 'sum', { name => 'ip_address', options => { with_plack_request => 1 }} );
 
 1;

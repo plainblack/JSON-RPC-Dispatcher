@@ -91,9 +91,17 @@ In F<app.psgi>:
 
 Class method. Registers a list of method names using L<JSON::RPC::Dispatcher>'s C<register> method.
 
+ __PACKAGE__->register_rpc_method_names( qw( add subtract multiply divide ));
+
 =head3 names
 
-The list of method names to register.
+The list of method names to register. If you want to use any registration options with a particular method you can do that by passing the method in as a hash reference like so:
+
+ __PACKAGE__->register_rpc_method_names(
+     'add',
+     { name => 'ip_address', options => { with_plack_request => 1 } },
+     'concat',
+ );
 
 =cut
 
@@ -123,7 +131,13 @@ sub to_app {
     my $ref;
     if ($ref = $self->can('_rpc_method_names')) {
         foreach my $method ($ref->()) {
-            $rpc->register($method, sub {  $self->$method(@_) });
+            if (ref $method eq 'HASH') {
+                my $name = $method->{name};
+                $rpc->register($name, sub { $self->$name(@_) }, $method->{options});
+            }
+            else {
+                $rpc->register($method, sub { $self->$method(@_) });
+            }
         }
     }
     $rpc->to_app;

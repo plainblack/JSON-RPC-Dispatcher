@@ -4,6 +4,7 @@
  - Added more documentation about what is logged.
  - Restructured request params handling.
  - Added with_plack_request registration option.
+ - Updated register_rpc_method_names() to support registration options.
 
 0.0402 2010-04-18
  - Fixed an uninitialized warning.
