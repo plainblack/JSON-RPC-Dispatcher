@@ -165,7 +165,7 @@ sub register {
     my ($self, $name, $sub, $options) = @_;
     my $rpcs = $self->rpcs;
     $rpcs->{$name} = {
-        code                => $sub,
+        function            => $sub,
         with_plack_request  => $options->{with_plack_request},
     };
     $self->rpcs($rpcs);
@@ -283,12 +283,10 @@ sub handle_procedures {
         my $is_notification = (defined $proc->id && $proc->id ne '') ? 0 : 1;
         unless ($proc->has_error_code) {
             my $rpc = $rpcs->{$proc->method};
-            if (defined $rpc) {
-                my $result;
-                my $code_ref = $rpc->{code};
-
+            my $code_ref = $rpc->{function};
+            if (defined $code_ref) {
                 # deal with params and calling
-                $result = eval{ $code_ref->( @{ $proc->params } ) };
+                my $result = eval{ $code_ref->( @{ $proc->params } ) };
 
                 # deal with result
                 if ($@ && ref($@) eq 'ARRAY') {

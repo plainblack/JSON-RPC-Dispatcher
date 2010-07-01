@@ -1,3 +1,6 @@
+0.0502 2010-07-01
+ - Fixed "method not found" bug introduced in 0.0500.
+
 0.0501 2010-06-30
  - Encoding JSON as UTF-8 per the JSON-RPC protocol specification, and for Plack Middleware compliance. Thanks to Peter Makholm for pointing this out.
 
