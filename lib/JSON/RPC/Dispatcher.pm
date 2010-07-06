@@ -140,18 +140,21 @@ has error_code => (
     is          => 'rw',
     default     => undef,
     predicate   => 'has_error_code',
+    clearer     => 'clear_error_code',
 );
 
 #--------------------------------------------------------
 has error_message => (
     is      => 'rw',
     default => undef,
+    clearer => 'clear_error_message',
 );
 
 #--------------------------------------------------------
 has error_data  => (
     is      => 'rw',
     default => undef,
+    clearer => 'clear_error_data',
 );
 
 #--------------------------------------------------------
@@ -159,6 +162,15 @@ has rpcs => (
     is      => 'rw',
     default => sub { {} },
 );
+
+#--------------------------------------------------------
+sub clear_error {
+    my ($self) = @_;
+
+    $self->clear_error_code;
+    $self->clear_error_message;
+    $self->clear_error_data;
+}
 
 #--------------------------------------------------------
 sub register {
@@ -350,6 +362,7 @@ sub call {
 
     my $request = Plack::Request->new($env);
     $log->info("REQUEST: ".$request->content) if $log->is_info;
+    $self->clear_error;
     my $procs = $self->acquire_procedures($request);
 
     my $rpc_response;
