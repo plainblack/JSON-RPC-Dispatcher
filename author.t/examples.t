@@ -1,5 +1,5 @@
 use LWP::UserAgent;
-use Test::More tests=>8;
+use Test::More tests=>9;
 
 my $ua = LWP::UserAgent->new;
 
@@ -14,6 +14,10 @@ is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"ping
 is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"echo","params":["Hello World!"],"id":"1"}')->content,
     '{"jsonrpc":"2.0","id":"1","result":"Hello World!"}',
     'echo test');
+
+is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"echo","params":["déjà vu"],"id":"1"}')->content,
+    '{"jsonrpc":"2.0","id":"1","result":"déjà vu"}',
+    'utf8 parameter test');
 
 is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"sum","params":[2,3,5],"id":"1"}')->content,
     '{"jsonrpc":"2.0","id":"1","result":10}',
