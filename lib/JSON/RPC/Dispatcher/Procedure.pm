@@ -41,7 +41,6 @@ Returns a boolean indicating whether an error code has been set.
 
 has error_code => (
     is          => 'rw',
-    default     => undef,
     predicate   => 'has_error_code',
 );
 
