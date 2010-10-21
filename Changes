@@ -1,3 +1,6 @@
+0.0506     -  -
+ - Added a new test to show how to decode UTF before passing it across the procedure.
+
 0.0505 2010-08-22
  - Something happened between Moose 1.08 and 1.10 that caused JRD::Procedure to always throw an error. This has been corrected in this release.
 

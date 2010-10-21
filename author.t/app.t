@@ -1,5 +1,5 @@
 use LWP::UserAgent;
-use Test::More tests=>2;
+use Test::More tests=>3;
 
 my $ua = LWP::UserAgent->new;
 
@@ -14,6 +14,10 @@ is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"sum"
 is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"ip_address","id":"1"}')->content,
     '{"jsonrpc":"2.0","id":"1","result":"127.0.0.1"}',
     'ip_address test - using with_plack_request');
+
+is($ua->post('http://localhost:5000/', Content=>'{"jsonrpc":"2.0","method":"utf8_string","id":"1"}')->content,
+    '{"jsonrpc":"2.0","id":"1","result":"déjà vu"}',
+    'utf8 string being returned');
 
 
 
