@@ -175,19 +175,13 @@ Returns the name of the procedure to be called.
 
 =head3 name
 
-An alphanumeric string. Sets the method name. Will set an error if the method name is not alpha-numeric.
+Per specification, any string is accepted as a potential JSON-RPC method name.
 
 =cut
 
 has method  => (
     is      => 'rw',
     default => undef,
-    trigger => sub {
-            my ($self, $new, $old) = @_;
-            if (defined $new && $new !~ m{^[A-Za-z0-9_]+$}xms) {
-                $self->invalid_request($new.' is not a valid method name.');
-            }
-        },
 );
 
 #--------------------------------------------------------

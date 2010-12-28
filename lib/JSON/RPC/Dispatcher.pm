@@ -46,6 +46,9 @@ This module follows the draft specficiation for JSON-RPC 2.0. More information c
 
 =head2 Registration Options
 
+The C<register> method cannot be used to register methods that start with m/^rpc\./.  Per the JSON-RPC 2.0 specification, these are reserved for 
+rpc-internal extensions.
+
 The C<register> method takes a third argument which is a hash reference of named options that effects how the code should be handled.
 
 =head3 with_plack_request
@@ -192,6 +195,13 @@ sub clear_error {
 #--------------------------------------------------------
 sub register {
     my ($self, $name, $sub, $options) = @_;
+
+	if(defined($name) && $name =~ m{^rpc\.}) { 
+		die "$name is an invalid name for a method. (Methods matching m/^rpc\\./ are reserved for rpc-internal procedures)";
+	} elsif(!defined($name) || $name eq '' || ref($name)) {
+		die "Registered method name must be a defined non-empty string and not start with 'rpc.'";	
+	}
+ 
     my $rpcs = $self->rpcs;
     $rpcs->{$name} = {
         function            => $sub,
