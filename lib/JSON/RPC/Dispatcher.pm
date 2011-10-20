@@ -343,12 +343,12 @@ sub handle_procedures {
                 }
                 elsif ($@) {
                     my $error = $@;
-                    if ($error->can('error') && $error->can('trace')) {
+                    if (blessed($error) && $error->can('error') && $error->can('trace')) {
                          $log->fatal($error->error);
                          $log->trace($error->trace->as_string);
                          $error = $error->error;
                     }
-                    elsif ($error->can('error')) {
+                    elsif (blessed($error) && $error->can('error')) {
                         $error = $error->error;
                         $log->fatal($error);
                     }
