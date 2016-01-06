@@ -128,7 +128,6 @@ All errors that are not gracefully handled by the system will be put into a fata
 
 
 use Moose;
-use bytes;
 extends qw(Plack::Component);
 use Plack::Request;
 use JSON;
@@ -396,7 +395,7 @@ sub call {
         }
         $response->status($self->translate_error_code_to_status( (ref $rpc_response eq 'HASH' && exists $rpc_response->{error}) ? $rpc_response->{error}{code} : '' ));
         $response->content_type('application/json-rpc');
-        $response->content_length(bytes::length($json));
+        $response->content_length(length($json));
         $response->body($json);
         if ($response->status == 200) {
             $log->info("RESPONSE: ".$response->body) if $log->is_info;

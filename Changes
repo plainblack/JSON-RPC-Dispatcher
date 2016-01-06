@@ -1,4 +1,8 @@
-0.0506     -  -
+0.0507 2016-  -
+ - Remove bytes usage.
+ - Dist::Zilla updates
+
+0.0506 2012-10-25
  - Added a new test to show how to decode UTF before passing it across the procedure.
 
 0.0505 2010-08-22
