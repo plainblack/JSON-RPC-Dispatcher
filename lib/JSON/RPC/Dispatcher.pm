@@ -61,6 +61,23 @@ The first argument passed into the function will be a reference to the Plack::Re
 
 B<TIP:> Before using this option consider whether you might be better served by a L<Plack::Middleware> component. For example, if you want to do HTTP Basic Auth on your requests, use L<Plack::Middleware::Basic::Auth> instead. 
 
+=head3 log_request_as
+
+This is a filter function for manipulating the parameters before being logged.  This is especially useful for code that accepts passwords.
+
+The first parameter to the code ref here will be the method name, the second is the parameter array reference.  The code ref is expected to return the modified param, but be careful.
+The array ref being passed in has had the plack_request removed, and so the array ref is a copy of the one that will be eventually passed to the handler function, so modifying the
+array is safe.  However, if an element of the array is another reference, that is not a copy, and so modifying that will require extra care.
+
+    sub {
+        my ($method, $params) = @_;
+        $params->[1] = 'xxx'; # works
+        $params->[0]{password} = 'xxx'; # broken
+        $params->[0] = { %{$params->[0]}, password => 'xxx' }; # works.
+
+        return $params; # required
+    }
+
 =head2 Advanced Error Handling
 
 You can also throw error messages rather than just C<die>ing, which will throw an internal server error. To throw a specific type of error, C<die>, C<carp>, or C<confess>, an array reference starting with the error code, then the error message, and finally ending with error data (optional). When JSON::RPC::Dispatcher detects this, it will throw that specific error message rather than a standard internal server error.
@@ -112,7 +129,7 @@ In the case when there is an unhandled exception, anything other than the error 
 
 =item TRACE
 
-If an exception is thrown that has a C<trace> method, then it's contents will be put into a trace log entry.
+If an exception is thrown that has a C<trace> method, then its contents will be put into a trace log entry.
 
 =item ERROR
 
@@ -133,6 +150,7 @@ use Plack::Request;
 use JSON;
 use JSON::RPC::Dispatcher::Procedure;
 use Log::Any qw($log);
+use Scalar::Util qw(blessed);
 
 #--------------------------------------------------------
 has error_code => (
@@ -178,6 +196,7 @@ sub register {
     $rpcs->{$name} = {
         function            => $sub,
         with_plack_request  => $options->{with_plack_request},
+        log_request_as      => $options->{log_request_as},
     };
     $self->rpcs($rpcs);
 }
@@ -297,6 +316,13 @@ sub handle_procedures {
             my $code_ref = $rpc->{function};
             if (defined $code_ref) {
                 # deal with params and calling
+                if ($log->is_info) {
+                    my $params = [grep { ! blessed $_ } @{$proc->params} ];
+                    if (my $func = $self->rpcs->{$proc->method}{log_request_as}) {
+                        $params = $func->($proc->method, $params);
+                    }
+                    $log->info("REQUEST: " . $proc->method . " " . to_json( $params ));
+                }
                 my $result = eval{ $code_ref->( @{ $proc->params } ) };
 
                 # deal with result
@@ -360,7 +386,6 @@ sub call {
     my ($self, $env) = @_;
 
     my $request = Plack::Request->new($env);
-    $log->info("REQUEST: ".$request->content) if $log->is_info;
     $self->clear_error;
     my $procs = $self->acquire_procedures($request);
 

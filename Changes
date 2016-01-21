@@ -1,6 +1,7 @@
-0.0507 2016-  -
+0.0507 2016-01-21
  - Remove bytes usage.
  - Dist::Zilla updates
+ - Allow user to override how requests are logged (passwords)
 
 0.0506 2012-10-25
  - Added a new test to show how to decode UTF before passing it across the procedure.
