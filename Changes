@@ -1,5 +1,6 @@
 0.0508 2016-01-21
  - Last image didn't seem to include setting $VERSION.
+ - Expand accepted method names (PR #1)
 
 0.0507 2016-01-21
  - Remove bytes usage.
